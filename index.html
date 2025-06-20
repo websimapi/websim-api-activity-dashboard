@@ -575,6 +575,12 @@
         async function backToMostRecent() {
             await checkForUpdates();
             showSlide(0);
+            
+            if (isAutoPlaying) {
+                stopAutoplay();
+                document.getElementById('playPauseBtn').innerHTML = '▶';
+                isAutoPlaying = false;
+            }
             resetProgress();
         }
 
