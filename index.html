@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@api Activity Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #667eea;
+        }
+
+        .user-details h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .projects-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .projects-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .project-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .status-posted {
+            background: #e8f5e8;
+            color: #2d5d31;
+        }
+
+        .status-draft {
+            background: #fff4e6;
+            color: #b56500;
+        }
+
+        .status-private {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .project-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .site-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .site-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .filters {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div id="userInfo" class="loading">Loading user information...</div>
+        </div>
+
+        <div class="projects-section">
+            <h2 class="section-title">All Projects & Activity</h2>
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterProjects('all')">All</button>
+                <button class="filter-btn" onclick="filterProjects('posted')">Posted</button>
+                <button class="filter-btn" onclick="filterProjects('draft')">Drafts</button>
+                <button class="filter-btn" onclick="filterProjects('recent')">Recent</button>
+            </div>
+            <div id="projectsContainer" class="loading">Loading projects...</div>
+        </div>
+    </div>
+
+    <script>
+        let allProjects = [];
+        let currentFilter = 'all';
+
+        async function loadUserData() {
+            try {
+                // Load user info
+                const userResponse = await fetch('/api/v1/users/api');
+                const userData = await userResponse.json();
+                displayUserInfo(userData.user);
+
+                // Load all projects (including non-posted)
+                const projectsResponse = await fetch('/api/v1/users/api/projects?first=100&sort_by=updated_at');
+                const projectsData = await projectsResponse.json();
+                allProjects = projectsData.projects.data;
+                displayProjects(allProjects);
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('userInfo').innerHTML = '<div class="error">Error loading user data</div>';
+                document.getElementById('projectsContainer').innerHTML = '<div class="error">Error loading projects</div>';
+            }
+        }
+
+        function displayUserInfo(user) {
+            const totalProjects = allProjects.length;
+            const postedProjects = allProjects.filter(p => p.project.posted).length;
+            const totalViews = allProjects.reduce((sum, p) => sum + p.project.stats.views, 0);
+            const totalLikes = allProjects.reduce((sum, p) => sum + p.project.stats.likes, 0);
+
+            document.getElementById('userInfo').innerHTML = `
+                <div class="user-info">
+                    <img src="https://images.websim.com/avatar/${user.username}" alt="${user.username}" class="avatar">
+                    <div class="user-details">
+                        <h1>@${user.username}</h1>
+                        <p>${user.description || 'No description available'}</p>
+                        <p><strong>Joined:</strong> ${new Date(user.created_at).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${totalProjects}</div>
+                        <div>Total Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${postedProjects}</div>
+                        <div>Posted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalViews.toLocaleString()}</div>
+                        <div>Total Views</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalLikes.toLocaleString()}</div>
+                        <div>Total Likes</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayProjects(projects) {
+            if (projects.length === 0) {
+                document.getElementById('projectsContainer').innerHTML = '<div class="loading">No projects found</div>';
+                return;
+            }
+
+            const html = projects.map(item => {
+                const project = item.project;
+                const site = item.site;
+                const projectRevision = item.project_revision;
+                
+                const statusClass = project.posted ? 'status-posted' : 
+                                  project.visibility === 'private' ? 'status-private' : 'status-draft';
+                const statusText = project.posted ? 'Posted' : 
+                                 project.visibility === 'private' ? 'Private' : 'Draft';
+
+                const updatedDate = new Date(project.updated_at).toLocaleDateString();
+                const createdDate = new Date(project.created_at).toLocaleDateString();
+
+                return `
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div>
+                                <div class="project-title">${project.title || 'Untitled Project'}</div>
+                                <div class="project-meta">
+                                    <span>Updated: ${updatedDate}</span>
+                                    <span>Created: ${createdDate}</span>
+                                    <span>Version: ${project.current_version || 'N/A'}</span>
+                                </div>
+                                <span class="project-status ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                        
+                        ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
+                        
+                        ${site && site.prompt ? `
+                            <div class="project-description">
+                                <strong>Latest Prompt:</strong> "${site.prompt.text || 'No prompt text'}"
+                                ${site.prompt.type ? `<br><em>Type: ${site.prompt.type}</em>` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="project-stats">
+                            <span>👀 ${project.stats.views} views</span>
+                            <span>❤️ ${project.stats.likes} likes</span>
+                            <span>💬 ${project.stats.comments} comments</span>
+                            ${project.slug ? `<span>🔗 /${project.slug}</span>` : ''}
+                        </div>
+                        
+                        ${site ? `<a href="https://websim.com/c/${site.id}" class="site-link" target="_blank">View Site →</a>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('projectsContainer').innerHTML = `<div class="projects-grid">${html}</div>`;
+        }
+
+        function filterProjects(type) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            currentFilter = type;
+            let filteredProjects = [...allProjects];
+
+            switch(type) {
+                case 'posted':
+                    filteredProjects = allProjects.filter(item => item.project.posted);
+                    break;
+                case 'draft':
+                    filteredProjects = allProjects.filter(item => !item.project.posted);
+                    break;
+                case 'recent':
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    filteredProjects = allProjects.filter(item => 
+                        new Date(item.project.updated_at) > oneWeekAgo
+                    );
+                    break;
+                default:
+                    // 'all' - no filtering needed
+                    break;
+            }
+
+            displayProjects(filteredProjects);
+        }
+
+        // Load data when page loads
+        loadUserData();
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
